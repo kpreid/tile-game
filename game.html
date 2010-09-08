@@ -1,0 +1,92 @@
+<html>
+  <title>CI272 Final Project - Tile Game - by Kevin Reid</title>
+  <style>
+    /* --- layout --- */
+    html {
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    .presidebar {
+      width: 13em;
+      display: table-cell;
+      float: right;
+      background: #EEE;
+      border-right: 1px outset #EEE;
+      height: 100%;
+    }
+    .presidebar > * {
+      margin: .3em;
+    }
+    .viewport {
+      /*width: 100%;*/
+      margin-right: 13em;
+      height: 100%;
+      background: black;
+    }
+    .viewport-mid {
+      /*display: table;*/
+      display: table;
+      height: 100%;
+      margin: auto;
+    }
+    .playfield {
+      display: table-cell;
+      vertical-align: middle;
+      /*margin: auto;*/
+    }
+    
+    /* inside playfield */
+    .layer {
+      left: 0;
+      top: 0;
+      display: table;
+      border-spacing: 0;
+      margin-bottom: -64.5%;
+    }
+    .layer td {
+      margin: 0;
+      padding: 0;
+    }
+    .layer img { 
+      width: 100%;
+      margin-top: -90%;
+    }
+  </style>
+  <script type="text/javascript" src="IVector.js"></script>
+  <script type="text/javascript" src="Tile.js"></script>
+  <script type="text/javascript" src="World.js"></script>
+  <script type="text/javascript" src="GameState.js"></script>
+  <script type="text/javascript" src="GameView.js"></script>
+  <script type="text/javascript" src="Map.js"></script>
+  <script>
+    var gameState = new GameState(gameMap);
+    var gameView;
+    window.onresize = function () { 
+      if (gameView != undefined) gameView.onresize();
+    };
+  </script>
+</head>
+<body onload="
+  gameView = new GameView(gameState, document.getElementById('playfield'), document.getElementById('viewport'));
+  document.onkeydown = gameView.onkeydown;
+">
+
+<!-- TODO: restart and about commands -->
+<div id="sidebar" class="presidebar">
+  <div id="state"></div>
+  <div id="inventory"></div>
+  <p>Use arrow keys to move around. The rest is for you to figure out.</p>
+</div>
+<div id="viewport" class="viewport">
+  <div class="viewport-mid"> <!-- styling box -->
+  <div id="playfield" class="playfield">
+    <img src="Resources/Key.png">
+  </div>
+  </div>
+</div>
+
+</body></html>

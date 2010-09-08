@@ -1,0 +1,180 @@
+' This is a comment.
+' Each map section starts with a listing of coordinate axes.
+'   The first axis is stepped by columns in this file.
+'   The second axis is stepped by lines in this file.
+'   The third axis is stepped by "$", which must occur at the end of a line or on a line by itself.
+' After the axes, the origin coordinates are given, always in xyz order.
+' After the first line, each character denotes a tile type. Space means "no change", not "empty space" -- that's "`".
+' A blank line indicates the start of a new map section.
+'   Whitespace on a line matters!
+
+' -------------------------------------------------------------------------
+' Ground
+xyz 0 0 0
+                    
+                    
+ 
+        ddddd
+   ddd  ddddd       
+        dddddd      
+        dddddd      
+        dddddd      
+         ddddd 
+         ddddd  
+         dddddd  
+          ddddddd
+           dddddd
+              ddd
+              ddd  d
+      ddddddddddddd $
+################    
+##..............##    
+#.................# 
+#........###.......#
+#........\ /.......#
+#........\ /.......#
+#........\  ^......#
+#.......\    /.....#
+#........\   /.....#
+#........\   /.....#
+#........\   /^....#
+ #........\    /#..#
+ #.........vvv  /..#
+  #...........\ /..#
+   ##.........\ /.##
+    ##########\ /## 
+
+' -------------------------------------------------------------------------
+' Gem with moat
+xyz 3 8 1
+ #####
+#######
+#######
+#######
+#######
+#######
+ ##### $
+      
+ pvvvp  
+ /WWW\ 
+ /W#W\  
+ /WWW\  
+ p656p  
+       $
+     
+     
+     
+   1  
+   
+ p   p 
+     
+     $
+
+
+' -------------------------------------------------------------------------
+' Cliff with washout
+xzy 0 0 1
+############  
+############  
+###########  
+#######dd# 
+#######
+..#W#..
+2 # #
+    
+$
+############   
+############\  
+###########\  
+########d^
+#######vp
+.d#4#d.
+  # #    
+$
+############  
+############  
+#########d#  
+#########
+########
+.d#w#d.v
+$
+# #########   
+# #######dd   
+########d    
+######## 
+########
+#d# #d##
+      
+$
+#########     
+#########     
+#######      
+ ## ##   
+$
+  #```#$
+   #`#$
+    #
+
+' -------------------------------------------------------------------------
+' Player and lone gems
+xyz 8 5 2
+P 
+
+xyz 17 13 2
+pp$
+3
+
+' Win testing
+'xzy 8 5 4
+'#####
+'P123X
+
+' -------------------------------------------------------------------------
+' Tower with gems
+xyz 13 4 0
+dd``dd
+dddddd 
+`dddd`
+`dddd`
+dddddd
+dd``dd$
+ #44# 
+#    # 
+4    4
+4    4
+#    #
+ #44# $
+ v  v
+/####\
+ #### 
+ #### 
+/####\
+ ^  ^ $
+ 
+  /## 
+ ####
+ ####
+ #### $
+ 
+   /#
+ ####
+ ####
+ #### $
+ 
+  
+ ###
+ #W#v
+ #6## $
+   
+ 
+ # 
+ # 
+ #\   $
+  
+ 
+ # 
+ ^ 
+      $   
+ 
+      
+ X  
