@@ -10,6 +10,7 @@ var GameView = (function () {
     "RampS": "Ramp%20North",
     "RampW": "Ramp%20East",
     "Player": "Character%20Boy",
+    "PlayerWon": "Character%20Boy",
     "Water": "Water%20Block",
     "WaterNew": "Water%20Block",
     "Gem1": "Gem%20Blue",

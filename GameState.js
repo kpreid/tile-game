@@ -39,7 +39,7 @@ function GameState(world, playerPos) {
   // Add an item to the inventory, and run the effects of taking it. It is the caller's
   // responsibility to clear the tile.
   function take(theTile) {
-    inventory.push(theTile);
+    inventory[theTile.name] = (inventory[theTile.name] || 0) + 1;
 
     if (theTile.gem()) {
       substituteTiles(theTile.gemToWall(), Tile.Empty);
@@ -47,6 +47,11 @@ function GameState(world, playerPos) {
     }
   }
   
+  function canWin() {
+    return inventory[Tile.Gem1.name] > 0 &&
+           inventory[Tile.Gem2.name] > 0 &&
+           inventory[Tile.Gem3.name] > 0;
+  }
   
   // Calculate the spread of water.
   function runWater() {
