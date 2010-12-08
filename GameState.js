@@ -6,6 +6,10 @@ function GameState(world, playerPos) {
 
   // The positions of tiles which should have gravity applied, after previous actions
   var gravityQueue = [];
+  
+  // Deferred player actions, if we're currently running a game action.
+  var deferred = false;
+  var deferQueue = [];
 
   // Executed after the direct effects of a player action have been performed, to handle
   // things like gravity, running water, and detecting a win.
@@ -26,6 +30,12 @@ function GameState(world, playerPos) {
     console.log("XXX evaluateGameState stub");
   }
   
+  function sendAnimation(verb, args) {
+    for (var li = 0; li < animationListeners.length; li++) {
+      animationListeners[li][verb].apply(animationListeners[li], args);
+    }
+  }
+  
   // Add an item to the inventory, and run the effects of taking it. It is the caller's
   // responsibility to clear the tile.
   function take(theTile) {
@@ -35,64 +45,63 @@ function GameState(world, playerPos) {
       substituteTiles(theTile.gemToWall(), Tile.Empty);
       evaluateGameState();
     }
-
-    animate();
   }
   
   
   // Calculate the spread of water.
   function runWater() {
     var Above = new IVector(0, 0, 1);
-    var needsUpdate = true;
-    while (needsUpdate) {
-      animate();
-      needsUpdate = false;
-      for (var xi = 0; xi < world.xw; xi++) {
-        for (var yi = 0; yi < world.yw; yi++) {
-          for (var zi = 0; zi < world.zw; zi++) {
-            var pos = new IVector(xi, yi, zi);
-            switch (world.get(pos)) {
-              case Tile.WaterNew:
-                world.set(pos, Tile.Water);
-                needsUpdate = true;
-                break;
-              case Tile.Water:
-                var belowPos = new IVector(xi, yi, zi - 1);
-                var belowTile = world.get(belowPos);
-                if (belowTile.isFloodableFrom(Above)) {
-                  // Water falls if space available                                
-                  if (world.set(belowPos, Tile.WaterNew)) {
-                    needsUpdate = true;
-                  }
-                } else if (belowTile.isWater()) {
-                  // do nothing
-                } else {
-                  // If no vertical space, propagates horizontally.
-                  var dirs = [
-                    // von Neumann neighborhood
-                    new IVector(-1, 0, 0), 
-                    new IVector(1, 0, 0),
-                    new IVector(0, -1, 0),
-                    new IVector(0, 1, 0)
-                  ];
-                  for (var i = 0; i < dirs.length; i++) {
-                    if (world.get(pos.add(dirs[i])).isFloodableFrom(new IVector(0,0,0).sub(dirs[i]))) {
-                      if (world.set(pos.add(dirs[i]), Tile.WaterNew)) {
-                        needsUpdate = true;
-                      }
+
+    needsUpdate = false;
+    for (var xi = 0; xi < world.xw; xi++) {
+      for (var yi = 0; yi < world.yw; yi++) {
+        for (var zi = 0; zi < world.zw; zi++) {
+          var pos = new IVector(xi, yi, zi);
+          switch (world.get(pos)) {
+            case Tile.WaterNew:
+              world.set(pos, Tile.Water);
+              needsUpdate = true;
+              break;
+            case Tile.Water:
+              var belowPos = new IVector(xi, yi, zi - 1);
+              var belowTile = world.get(belowPos);
+              if (belowTile.isFloodableFrom(Above)) {
+                // Water falls if space available                                
+                if (world.set(belowPos, Tile.WaterNew)) {
+                  needsUpdate = true;
+                }
+              } else if (belowTile.isWater()) {
+                // do nothing
+              } else {
+                // If no vertical space, propagates horizontally.
+                var dirs = [
+                  // von Neumann neighborhood
+                  new IVector(-1, 0, 0), 
+                  new IVector(1, 0, 0),
+                  new IVector(0, -1, 0),
+                  new IVector(0, 1, 0)
+                ];
+                for (var i = 0; i < dirs.length; i++) {
+                  var other = pos.add(dirs[i]);
+                  if (world.get(other).isFloodableFrom(new IVector(0,0,0).sub(dirs[i]))) {
+                    if (world.set(other, Tile.WaterNew)) {
+                      sendAnimation("moveFrom", [other, pos]);
+                      needsUpdate = true;
                     }
                   }
                 }
-                break;
-            }
+              }
+              break;
           }
         }
       }
     }
-  }
-
-  function animate() {
-    console.log("XXX Warning: using animate stub");
+    
+    if (needsUpdate) {
+      defer();
+      doNext(runWater);
+      setTimeout(resume, 100); // XXX make this set up to match onscreen animation
+    }
   }
   
   // Apply gravity to what might be in the given tile
@@ -103,11 +112,9 @@ function GameState(world, playerPos) {
       console.log("Gravity does apply to " + theTile);
       var belowTile = world.get(objectPos.add(new IVector(0, 0, -1)));
       if (belowTile.canOccupy()) {
-        animate();
         console.log("gravity move of " + theTile, moveObject(objectPos, new IVector(0, 0, -1)));
         if (theTile !== Tile.Player && objectPos.z === 0) {
           // Fall off bottom of world
-          animate();
           world.set(objectPos, Tile.Empty);
         }
       } else if (belowTile === Tile.Player && theTile.isTakeable()) {
@@ -197,9 +204,7 @@ function GameState(world, playerPos) {
       world.setPlayerPos(newPos);
     }
     world.set(newPos, newObjectTile);
-    for (var li = 0; li < animationListeners.length; li++) {
-      animationListeners[li].moveFrom(newPos, pos);
-    }
+    sendAnimation("moveFrom", [newPos, pos]);
 
     // Apply gravity to moved object
     gravityQueue.push(newPos);
@@ -228,6 +233,43 @@ function GameState(world, playerPos) {
     }
   }
 
+  // -----
+  
+  // Wrap a function so it waits until after animation.
+  function deferrable(f) {
+    return function () {
+      var a = arguments;
+      if (deferred) {
+        deferQueue.push(function () { f.apply(undefined, a); });
+      } else {
+        f.apply(undefined, a);
+      }
+    };
+  }
+  
+  function doNext(f) {
+    if (!deferred) {
+      setTimeout(f, 0);
+    } else {
+      deferQueue.unshift(f);
+    }
+  }
+  
+  function defer() {
+    deferred = true;
+  }
+  
+  function resume() {
+    if (deferQueue.length > 0) {
+      setTimeout(function () {
+        deferred = false;
+        deferQueue.shift()();
+        if (!deferred) resume(); // eventual loop
+      },0);
+    } else {
+      deferred = false;
+    }
+  }
   
   // -----
   
@@ -237,11 +279,11 @@ function GameState(world, playerPos) {
     addAnimationListener: function (l) {
       animationListeners.push(l);
     },
-    movePlayer: function (delta) {
+    movePlayer: deferrable(function (delta) {
       var res = moveObject(world.getPlayerPos(), delta);
       thatWhichHappensAfterPlayerAction();
       return res;
-    },
+    }),
     toString: function () { return "[GameState]"; }
   };
 }

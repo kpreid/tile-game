@@ -38,13 +38,14 @@ function World(xw, yw, zw, array, playerPos) {
       var y = pos.y;
       var z = pos.z;
       if (x < 0 || y < 0 || z < 0 || x >= xw || y >= yw || z >= zw) {
-        //throw new Error("OOB");
+        return false;
       } else {
         array[x*yw*zw + y*zw + z] = tile;
       }
       for (var i = 0; i < changeListeners.length; i++) {
-        changeListeners[i](pos);
+        changeListeners[i](pos); // interleaving hazard...
       }
+      return true;
     },
     getPlayerPos: function () { return playerPos; },
     setPlayerPos: function (pp) { playerPos = pp; },
