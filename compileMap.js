@@ -2,7 +2,7 @@ if (arguments.length !== 1) {
   throw new Error("Usage: compileMap.js <mapfile>");
 }
 
-var map = readFile("Map.tilemap");
+var map = readFile(arguments[0]);
 
 // --- Parser
 var i = 0; // Position in map string.
