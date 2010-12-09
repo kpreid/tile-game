@@ -55,6 +55,17 @@
       width: 100%;
       margin-top: -90%;
     }
+    
+    .inventory {
+      display: table;
+      margin: .5em auto;
+      height: 2em;
+    }
+    .inventory img {
+      display: inline;
+      width: 30%;
+      height: auto;
+    }
   </style>
   <script type="text/javascript" src="IVector.js"></script>
   <script type="text/javascript" src="Tile.js"></script>
@@ -71,14 +82,14 @@
   </script>
 </head>
 <body onload="
-  gameView = new GameView(gameState, document.getElementById('playfield'), document.getElementById('viewport'));
+  gameView = new GameView(gameState, document.getElementById('playfield'), document.getElementById('viewport'), document.getElementById('state'), document.getElementById('inventory'));
   document.onkeydown = gameView.onkeydown;
 ">
 
 <!-- TODO: restart and about commands -->
 <div id="sidebar" class="presidebar">
   <div id="state"></div>
-  <div id="inventory"></div>
+  <div id="inventory" class="inventory"></div>
   <p>Use arrow keys to move around. The rest is for you to figure out.</p>
 </div>
 <div id="viewport" class="viewport">

@@ -1,5 +1,6 @@
 function GameState(world, playerPos) {
   var animationListeners = [];
+  var playListeners = [];
   
   // Items picked up
   var inventory = [];
@@ -36,6 +37,12 @@ function GameState(world, playerPos) {
     }
   }
   
+  function sendPlay(verb, args) {
+    for (var li = 0; li < playListeners.length; li++) {
+      playListeners[li][verb].apply(playListeners[li], args);
+    }
+  }
+  
   // Add an item to the inventory, and run the effects of taking it. It is the caller's
   // responsibility to clear the tile.
   function take(theTile) {
@@ -45,6 +52,7 @@ function GameState(world, playerPos) {
       substituteTiles(theTile.gemToWall(), Tile.Empty);
       evaluateGameState();
     }
+    sendPlay("take", [theTile]);
   }
   
   function canWin() {
@@ -283,6 +291,9 @@ function GameState(world, playerPos) {
     world: world,
     addAnimationListener: function (l) {
       animationListeners.push(l);
+    },
+    addPlayListener: function (l) {
+      playListeners.push(l);
     },
     movePlayer: deferrable(function (delta) {
       var res = moveObject(world.getPlayerPos(), delta);

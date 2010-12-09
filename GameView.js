@@ -26,7 +26,7 @@ var GameView = (function () {
     return Number(/^(\d+)px/.exec(cssLength)[1]);
   }
 
-  function GameView(state, playfield, viewport) {
+  function GameView(state, playfield, viewport, stateView, inventoryView) {
     var world = state.world;
     while (playfield.firstChild) {
       playfield.removeChild(playfield.firstChild);
@@ -100,6 +100,13 @@ var GameView = (function () {
     
     // TODO: create shadows
     
+    // Update an arbitrary tile element from tile (used for inventory and world)
+    function updateImage(tileElem, tile) {
+      tileElem.style.visibility = (tile === Tile.Empty) ? "hidden" : "visible";
+      var image = tileToImage[tile.name] || "Rock";
+      tileElem.src = "resources/"+image+".png";
+    }
+    
     // Update tile image from world
     function update(pos) {
       var x = pos.x;
@@ -107,9 +114,7 @@ var GameView = (function () {
       var z = pos.z;
       var tile = world.get(pos);          
       var tileElem = tileElems[x*world.yw*world.zw + y*world.zw + z];
-      tileElem.style.visibility = (tile === Tile.Empty) ? "hidden" : "visible";
-      var image = tileToImage[tile.name] || "Rock";
-      tileElem.src = "resources/"+image+".png";
+      updateImage(tileElem, tile);
     }
     
     function calcViewPos(x, y, z) {
@@ -169,12 +174,21 @@ var GameView = (function () {
       }
     };
     
+    var playListener = {
+      take: function (tile) {
+        var tileElem = document.createElement("img");
+        inventoryView.appendChild(tileElem);
+        updateImage(tileElem, tile);
+      }
+    };
+    
     function movePlayerKey(x,y,z) {
       state.movePlayer(new IVector(x, y, z));
     }
     
     world.addChangeListener(update);
     state.addAnimationListener(animate);
+    state.addPlayListener(playListener);
     
     return {
       onresize: function () {
