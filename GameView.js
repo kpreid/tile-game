@@ -180,9 +180,9 @@ var GameView = (function () {
         inventoryView.appendChild(tileElem);
         updateImage(tileElem, tile);
       },
-      mode: function (mode) {
+      status: function (status) {
         var text = "<error>";
-        switch (mode) {
+        switch (status) {
           case "exitable":
             text = "Your next step: Get to the star!";
             // XXX enable exit highlight
@@ -213,7 +213,7 @@ var GameView = (function () {
     world.addChangeListener(update);
     state.addAnimationListener(animate);
     state.addPlayListener(playListener);
-    playListener.mode(state.getGameMode());
+    playListener.status(state.getGameStatus());
     
     return {
       onresize: function () {

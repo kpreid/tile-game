@@ -34,16 +34,16 @@ function GameState(world, playerPos) {
     var thePlayerTile = world.get(world.getPlayerPos());
     switch (thePlayerTile) {
       case Tile.Player:
-        gameMode = canWin() ? "exitable" : "playing";
+        gameStatus = canWin() ? "exitable" : "playing";
         break;
       case Tile.PlayerWon:
-        gameMode = "won";
+        gameStatus = "won";
         break;
       default:
-        gameMode = thePlayerTile.isWater() ? "drowned" : "other-loss";
+        gameStatus = thePlayerTile.isWater() ? "drowned" : "other-loss";
         break;
     }
-    sendPlay("mode", [gameMode]);
+    sendPlay("status", [gameStatus]);
   }
   
   function sendAnimation(verb, args) {
@@ -309,8 +309,8 @@ function GameState(world, playerPos) {
     addPlayListener: function (l) {
       playListeners.push(l);
     },
-    getGameMode: function () {
-      return gameMode;
+    getGameStatus: function () {
+      return gameStatus;
     },
     movePlayer: deferrable(function (delta) {
       var res = moveObject(world.getPlayerPos(), delta);
