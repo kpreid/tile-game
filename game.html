@@ -22,8 +22,8 @@
       margin: .3em;
     }
     .viewport {
-      /*width: 100%;*/
-      margin-right: 13em;
+      z-index: 0;
+      /*margin-right: 13em; -- for sidebar, now removed */
       height: 100%;
       background: black;
     }
@@ -56,16 +56,54 @@
       margin-top: -90%;
     }
     
+
+    .overlay {
+      position: fixed;
+
+      /* Note: According to http://www.w3.org/TR/CSS2/visuren.html#z-index,
+         that .viewport has a z-index of 0 ought to make this and that a
+         separate stacking context from the contents of the viewport, but
+         that doesn't seem to work that way. So this z-index is very large
+         to get in front of all of the tiles. */
+      z-index: 100000000;
+
+      padding: .3em;
+      font-family: sans-serif;
+
+      background: black;
+      color: white;
+      opacity: .7;
+      -webkit-border-radius: .5em;
+      -moz-border-radius: .5em;
+      -webkit-box-shadow: inset 0 0 .3em .0em white, 0 0 .3em .0em white;
+      -moz-box-shadow: inset 0 0 .3em .0em white, 0 0 .3em .0em white;
+    }
+    
+    .inventory-frame {
+      left: .7em;
+      bottom: .7em;
+    }
     .inventory {
-      display: table;
-      margin: .5em auto;
-      height: 2em;
+      display: block;
+      text-align: center;
+      height: 4em;
+      margin-top: -10%; /* kludge for images */
     }
     .inventory img {
       display: inline;
-      width: 30%;
-      height: auto;
+      height: 100%;
     }
+    
+    .instructions {
+      right: .7em;
+      top: .7em;
+      min-width: 8em;
+      max-width: 15em;
+      width: 30%;
+    }
+    .instructions p:first-child { margin-top: 0; }
+    .instructions p:first-child + p { margin-bottom: 0; }
+    
   </style>
   <script type="text/javascript" src="IVector.js"></script>
   <script type="text/javascript" src="Tile.js"></script>
@@ -87,16 +125,21 @@
 ">
 
 <!-- TODO: restart and about commands -->
-<div id="sidebar" class="presidebar">
-  <div id="state"></div>
-  <div id="inventory" class="inventory"></div>
-  <p>Use arrow keys to move around. The rest is for you to figure out.</p>
-</div>
 <div id="viewport" class="viewport">
   <div class="viewport-mid"> <!-- styling box -->
   <div id="playfield" class="playfield">
     <img src="Resources/Key.png">
   </div>
+  </div>
+</div>
+<div class="overlays">
+  <div class="inventory-frame overlay">
+    You have:<br>
+    <div id="inventory" class="inventory"></div>
+  </div>
+  <div class="overlay instructions">
+    <p>Use arrow keys to move around. The rest is for you to figure out.</p>
+    <p id="state"></p>
   </div>
 </div>
 
