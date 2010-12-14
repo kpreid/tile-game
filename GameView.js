@@ -179,6 +179,30 @@ var GameView = (function () {
         var tileElem = document.createElement("img");
         inventoryView.appendChild(tileElem);
         updateImage(tileElem, tile);
+      },
+      mode: function (mode) {
+        var text = "<error>";
+        switch (mode) {
+          case "exitable":
+            text = "Your next step: Get to the star!";
+            // XXX enable exit highlight
+            break;
+          case "playing":
+            text = "Your next step: Collect the three gems!";
+            break;
+          case "won":
+            text = "Congratulations! You've won!";
+            // XXX win animation
+            break;
+          case "drowned":
+            text = "You drowned!";
+            // XXX add restart button
+            break;
+          case "other-loss":
+            text = "You died from something other than drowning! Congratulations!";
+            break;
+        }
+        stateView.innerHTML = text;
       }
     };
     
@@ -189,6 +213,7 @@ var GameView = (function () {
     world.addChangeListener(update);
     state.addAnimationListener(animate);
     state.addPlayListener(playListener);
+    playListener.mode(state.getGameMode());
     
     return {
       onresize: function () {

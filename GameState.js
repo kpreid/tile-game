@@ -12,6 +12,8 @@ function GameState(world, playerPos) {
   var deferred = false;
   var deferQueue = [];
 
+  var gameState = "playing";
+
   // Executed after the direct effects of a player action have been performed, to handle
   // things like gravity, running water, and detecting a win.
   function thatWhichHappensAfterPlayerAction() {
@@ -25,10 +27,23 @@ function GameState(world, playerPos) {
       console.groupEnd();
     }
     runWater();
+    evaluateGameState();
   }
 
   function evaluateGameState() {
-    console.log("XXX evaluateGameState stub");
+    var thePlayerTile = world.get(world.getPlayerPos());
+    switch (thePlayerTile) {
+      case Tile.Player:
+        gameMode = canWin() ? "exitable" : "playing";
+        break;
+      case Tile.PlayerWon:
+        gameMode = "won";
+        break;
+      default:
+        gameMode = thePlayerTile.isWater() ? "drowned" : "other-loss";
+        break;
+    }
+    sendPlay("mode", [gameMode]);
   }
   
   function sendAnimation(verb, args) {
@@ -50,7 +65,6 @@ function GameState(world, playerPos) {
 
     if (theTile.gem()) {
       substituteTiles(theTile.gemToWall(), Tile.Empty);
-      evaluateGameState();
     }
     sendPlay("take", [theTile]);
   }
@@ -294,6 +308,9 @@ function GameState(world, playerPos) {
     },
     addPlayListener: function (l) {
       playListeners.push(l);
+    },
+    getGameMode: function () {
+      return gameMode;
     },
     movePlayer: deferrable(function (delta) {
       var res = moveObject(world.getPlayerPos(), delta);
