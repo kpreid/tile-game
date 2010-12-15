@@ -16,9 +16,9 @@ var GameView = (function () {
     "Gem1": "Gem%20Blue",
     "Gem2": "Gem%20Green",
     "Gem3": "Gem%20Orange",
-    "GemWall1": "Plain%20Block",
-    "GemWall2": "Plain%20Block",
-    "GemWall3": "Plain%20Block",
+    "GemWall1": "Block%20Blue",
+    "GemWall2": "Block%20Green",
+    "GemWall3": "Block%20Orange",
     "Exit": "Selector"
   };
 
