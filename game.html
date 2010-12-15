@@ -10,33 +10,12 @@
       margin: 0;
       padding: 0;
     }
-    .presidebar {
-      width: 13em;
-      display: table-cell;
-      float: right;
-      background: #EEE;
-      border-right: 1px outset #EEE;
-      height: 100%;
-    }
-    .presidebar > * {
-      margin: .3em;
-    }
+
     .viewport {
       z-index: 0;
       /*margin-right: 13em; -- for sidebar, now removed */
       height: 100%;
       background: black;
-    }
-    .viewport-mid {
-      /*display: table;*/
-      display: table;
-      height: 100%;
-      margin: auto;
-    }
-    .playfield {
-      display: table-cell;
-      vertical-align: middle;
-      /*margin: auto;*/
     }
     
     .overlay {
@@ -108,10 +87,8 @@
 
 <!-- TODO: restart and about commands -->
 <div id="viewport" class="viewport">
-  <div class="viewport-mid"> <!-- styling box -->
   <div id="playfield" class="playfield">
     <img src="Resources/Key.png">
-  </div>
   </div>
 </div>
 <div class="overlays">
