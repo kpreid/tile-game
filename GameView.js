@@ -43,6 +43,9 @@ var GameView = (function () {
     // get the same results.
     
     // View parameters:
+    // Width and height of area tiles are displayed in
+    var fieldWidth;
+    var fieldHeight;
     // px dimensions to scale tiles to
     var drawWidth;
     var drawHeight;
@@ -53,15 +56,23 @@ var GameView = (function () {
     // document px offsets for the origin of the scene
     var xOrigin;
     var yOrigin;
+    // world bounding box
+    var worldBBNX;
+    var wroldBBPX;
+    var worldBBNY;
+    var wroldBBPY;
+    
+    // player position noted, used for scrolling
+    var playerPos;
     
     function calcView() {
       var computedStyle = window.getComputedStyle(viewport, null);
-      var fieldWidth = toPx(computedStyle.width); // XXX stub
-      var fieldHeight = toPx(computedStyle.height);
+      fieldWidth = toPx(computedStyle.width);
+      fieldHeight = toPx(computedStyle.height);
 
       var viewScale = Math.min(fieldWidth  / (world.xw * rawTileXStep),
                                fieldHeight / (world.yw * rawTileYStep + world.zw * rawTileZStep + rawTileHeight));
-                              
+      viewScale = Math.max(viewScale, 0.25); // XXX less arbitrary stop; compare to em unit size
 
       // Pixel width and height an individual tile is drawn at
       drawWidth  = Math.max(1, Math.floor(viewScale * rawTileWidth));
@@ -72,12 +83,35 @@ var GameView = (function () {
       yUnit = Math.max(1, Math.floor(viewScale * rawTileYStep));
       zUnit = Math.max(1, Math.floor(viewScale * rawTileZStep));
 
-      // Center view
-      xOrigin = (fieldWidth - xUnit * world.xw) / 2;
-      yOrigin = (fieldHeight - yUnit * world.yw + zUnit * world.zw) / 2;
-      //yOrigin = (world.zw - 1) * zUnit;
-      console.log("", xUnit, " ", yUnit, " ", zUnit, " ", xOrigin, " ", yOrigin);
+      worldBBNX = 0;
+      worldBBPX = xUnit * world.xw;
+      worldBBNY = -zUnit * world.zw;
+      worldBBPY = yUnit * (world.yw + 1);
+
+      scroll();
     }
+    
+    function fit(fieldDim, player, lowerBound, upperBound) {
+      if (fieldDim < (upperBound - lowerBound)) {
+        return Math.round(Math.max(-upperBound + fieldDim, Math.min(-lowerBound, fieldDim / 2 - player)));
+      } else {
+        return Math.round(fieldDim / 2 - (upperBound + lowerBound)/2);
+      }
+    }
+
+    function scroll() {
+      var vp;
+      if (playerPos == undefined) {
+        vp = {x:0,y:0};
+      } else {
+         vp = calcViewPos(playerPos);
+      }
+
+      playfield.style.position = "relative";
+      playfield.style.left = fit(fieldWidth,  vp.x + drawWidth  / 2, worldBBNX, worldBBPX) + "px";
+      playfield.style.top  = fit(fieldHeight, vp.y + drawHeight / 2, worldBBNY, worldBBPY) + "px";
+    }
+    
     calcView();
     
     // Create tile images
@@ -114,15 +148,18 @@ var GameView = (function () {
       var z = pos.z;
       var tile = world.get(pos);          
       var tileElem = tileElems[x*world.yw*world.zw + y*world.zw + z];
+      if (tile == Tile.Player || tile == Tile.PlayerWon) {
+        playerPos = pos;
+        scroll();
+      }
       updateImage(tileElem, tile);
     }
     
-    function calcViewPos(x, y, z) {
+    function calcViewPos(pos) {
       return {
-        x: x * xUnit + xOrigin,
-        y: y * yUnit - z * zUnit + yOrigin,
-        zIndex: 1 + (y + z) * 1000
-        // XXX TODO figure out why this fails to handle animation (eg going left off a ramp) properly.
+        x: pos.x * xUnit,
+        y: pos.y * yUnit - pos.z * zUnit,
+        zIndex: 1 + (pos.y + pos.z) * 1000
       };
     }
     
@@ -131,9 +168,10 @@ var GameView = (function () {
       for (var z = 0; z < world.zw; z++) {
         for (var y = 0; y < world.yw; y++) {
           for (var x = 0; x < world.xw; x++) {
-            var tile = world.get(new IVector(x, y, z));          
+            var vec = new IVector(x, y, z);
+            var tile = world.get(vec);
             var tileElem = tileElems[x*world.yw*world.zw + y*world.zw + z];
-            var vp = calcViewPos(x, y, z);
+            var vp = calcViewPos(vec);
 
             tileElem.style.zIndex = vp.zIndex;
             tileElem.style.left = vp.x + "px";
@@ -146,7 +184,7 @@ var GameView = (function () {
     }
     
     layout();
-    
+
     var animate = {
       moveFrom: function (pos, oldPos) {
         var offset = (oldPos.sub(pos));
@@ -162,10 +200,18 @@ var GameView = (function () {
             clearInterval(interval);
             tileAnims[index] = null;
           }
-          var vp = calcViewPos(pos.x + offset.x * t, pos.y + offset.y * t, pos.z + offset.z * t);
+          var animPos = pos.add(new IVector(offset.x * t, offset.y * t, offset.z * t)); // XXX abuse of IVector
+          var vp = calcViewPos(animPos);
           tileElem.style.zIndex = vp.zIndex;
           tileElem.style.left = vp.x + "px";
           tileElem.style.top = vp.y + "px";
+          
+          var tile = world.get(pos);
+          if (tile == Tile.Player || tile == Tile.PlayerWon) {
+            playerPos = animPos;
+            scroll();
+          }
+          
           //console.log("animation", vp.x, (vp.x + (1 - t) * xUnit));
         }
         interval = setInterval(anim, 10);
@@ -206,8 +252,8 @@ var GameView = (function () {
       }
     };
     
-    function movePlayerKey(x,y,z) {
-      state.movePlayer(new IVector(x, y, z));
+    function movePlayerKey(x,y) {
+      state.movePlayer(new IVector(x, y, 0));
     }
     
     world.addChangeListener(update);
@@ -222,16 +268,17 @@ var GameView = (function () {
       },
       onkeydown: function (event) {
         switch (event.keyCode) {
-          case 37: movePlayerKey(-1,  0, 0); break; // left
-          case 38: movePlayerKey( 0, -1, 0); break; // up
-          case 39: movePlayerKey( 1,  0, 0); break; // right
-          case 40: movePlayerKey( 0,  1, 0); break; // down
+          case 37: movePlayerKey(-1,  0); break; // left
+          case 38: movePlayerKey( 0, -1); break; // up
+          case 39: movePlayerKey( 1,  0); break; // right
+          case 40: movePlayerKey( 0,  1); break; // down
           default:
             console.log("Ignoring keyCode " + event.keyCode);
             return true;
         }
         return false;
-      }
+      },
+      playerMove: movePlayerKey
     };
   }
   return GameView;
