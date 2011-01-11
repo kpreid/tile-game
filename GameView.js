@@ -58,9 +58,12 @@ var GameView = (function () {
     var yOrigin;
     // world bounding box
     var worldBBNX;
-    var wroldBBPX;
+    var worldBBPX;
     var worldBBNY;
-    var wroldBBPY;
+    var worldBBPY;
+    // offset of display origin independent of bounding box
+    var offsetX;
+    var offsetY;
     
     // player position noted, used for scrolling
     var playerPos;
@@ -87,18 +90,11 @@ var GameView = (function () {
       worldBBPX = xUnit * world.xw;
       worldBBNY = -zUnit * world.zw;
       worldBBPY = yUnit * (world.yw + 1);
-
-      scroll();
+      
+      offsetX = Math.max(-worldBBNX, (fieldWidth - (worldBBPX - worldBBNX)) / 2);
+      offsetY = Math.max(-worldBBNY, (fieldHeight - (worldBBPY - worldBBNY)) / 2);
     }
     
-    function fit(fieldDim, player, lowerBound, upperBound) {
-      if (fieldDim < (upperBound - lowerBound)) {
-        return Math.round(Math.max(-upperBound + fieldDim, Math.min(-lowerBound, fieldDim / 2 - player)));
-      } else {
-        return Math.round(fieldDim / 2 - (upperBound + lowerBound)/2);
-      }
-    }
-
     function scroll() {
       var vp;
       if (playerPos == undefined) {
@@ -107,12 +103,12 @@ var GameView = (function () {
          vp = calcViewPos(playerPos);
       }
 
-      playfield.style.position = "relative";
-      playfield.style.left = fit(fieldWidth,  vp.x + drawWidth  / 2, worldBBNX, worldBBPX) + "px";
-      playfield.style.top  = fit(fieldHeight, vp.y + drawHeight / 2, worldBBNY, worldBBPY) + "px";
+      window.scrollTo(vp.x - (fieldWidth - drawWidth) / 2,
+                      vp.y - (fieldHeight - drawHeight) / 2);
     }
     
     calcView();
+    setTimeout(scroll, 0);
     
     // Create tile images
     var tileElems = [];
@@ -157,8 +153,8 @@ var GameView = (function () {
     
     function calcViewPos(pos) {
       return {
-        x: pos.x * xUnit,
-        y: pos.y * yUnit - pos.z * zUnit,
+        x: pos.x * xUnit + offsetX,
+        y: pos.y * yUnit - pos.z * zUnit + offsetY,
         zIndex: 1 + (pos.y + pos.z) * 1000
       };
     }
