@@ -18,13 +18,13 @@ function GameState(world, playerPos) {
   // things like gravity, running water, and detecting a win.
   function thatWhichHappensAfterPlayerAction() {
     while (gravityQueue.length > 0) {
-      console.group("gravity round");
+      //console.group("gravity round");
       var gq = gravityQueue;
       gravityQueue = [];
       for (var i = 0; i < gq.length; i++) {
         gravity(gq[i]);
       }
-      console.groupEnd();
+      //console.groupEnd();
     }
     runWater();
     evaluateGameState();
@@ -136,10 +136,13 @@ function GameState(world, playerPos) {
   function gravity(objectPos) {
     var theTile = world.get(objectPos);
     if (theTile.isPushable() || theTile.isTakeable() || theTile === Tile.Player) {
-      console.log("Gravity does apply to " + theTile);
+      //console.log("Gravity does apply to " + theTile);
       var belowTile = world.get(objectPos.add(new IVector(0, 0, -1)));
       if (belowTile.canOccupy()) {
-        console.log("gravity move of " + theTile, moveObject(objectPos, new IVector(0, 0, -1)));
+        //console.log("gravity move of " + theTile, 
+          moveObject(objectPos, new IVector(0, 0, -1))
+        //)
+          ;
         if (theTile !== Tile.Player && objectPos.z === 0) {
           // Fall off bottom of world
           world.set(objectPos, Tile.Empty);
@@ -150,7 +153,7 @@ function GameState(world, playerPos) {
         gravityQueue.push(objectPos.add(new IVector(0, 0, 1)));
       }
     } else {
-      console.log("Gravity does not apply to " + theTile);
+      //console.log("Gravity does not apply to " + theTile);
     }
   }
   
