@@ -226,11 +226,11 @@ var GameView = (function () {
         var text = "<error>";
         switch (status) {
           case "exitable":
-            text = "Your next step: Get to the star!";
+            text = "Get to the star tile!";
             // XXX enable exit highlight
             break;
           case "playing":
-            text = "Your next step: Collect the three gems!";
+            text = "Collect the three gems!";
             break;
           case "won":
             text = "Congratulations! You've won!";
