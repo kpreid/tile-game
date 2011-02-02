@@ -75,7 +75,7 @@ var GameView = (function () {
 
       var viewScale = Math.min(fieldWidth  / (world.xw * rawTileXStep),
                                fieldHeight / (world.yw * rawTileYStep + world.zw * rawTileZStep + rawTileHeight));
-      viewScale = Math.max(viewScale, 0.25); // XXX less arbitrary stop; compare to em unit size
+      viewScale = Math.max(viewScale, 0.45); // XXX less arbitrary stop; compare to em unit size
 
       // Pixel width and height an individual tile is drawn at
       drawWidth  = Math.max(1, Math.floor(viewScale * rawTileWidth));
