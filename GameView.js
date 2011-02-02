@@ -113,6 +113,7 @@ var GameView = (function () {
     // Create tile images
     var tileElems = [];
     var tileAnims = [];
+    var tileShadows = [];
     for (var x = 0; x < world.xw; x++) {
       for (var y = 0; y < world.yw; y++) {
         for (var z = 0; z < world.zw; z++) {
@@ -121,6 +122,7 @@ var GameView = (function () {
           var tileElem = document.createElement("img");
           tileElems.push(tileElem);
           tileAnims.push(null);
+          tileShadows.push([]); // dynamically created later
           playfield.appendChild(tileElem);
           tileElem.style.position="absolute";
           update(new IVector(x,y,z));
@@ -128,13 +130,23 @@ var GameView = (function () {
       }
     }
     
-    // TODO: create shadows
     
     // Update an arbitrary tile element from tile (used for inventory and world)
     function updateImage(tileElem, tile) {
       tileElem.style.visibility = (tile === Tile.Empty) ? "hidden" : "visible";
       var image = tileToImage[tile.name] || "Rock";
       tileElem.src = "resources/"+image+".png";
+    }
+    
+    function shadow(shadows, image, pos, fudge) {
+      var shadow = document.createElement("img");
+      shadow.style.position="absolute";
+      shadow.src = "resources/"+image+".png";
+      setViewPos(shadow, pos, fudge);
+      setViewScale(shadow);
+
+      shadows.push(shadow);
+      playfield.appendChild(shadow);
     }
     
     // Update tile image from world
@@ -144,11 +156,71 @@ var GameView = (function () {
       var z = pos.z;
       var tile = world.get(pos);          
       var tileElem = tileElems[x*world.yw*world.zw + y*world.zw + z];
+      
       if (tile == Tile.Player || tile == Tile.PlayerWon) {
         playerPos = pos;
         scroll();
       }
+      
       updateImage(tileElem, tile);
+      updateShadows(pos);
+    }
+    
+    function updateShadows(pos) {
+      var x = pos.x;
+      var y = pos.y;
+      var z = pos.z;
+      var index = x*world.yw*world.zw + y*world.zw + z;
+      var shadows = tileShadows[index];
+      while (shadows.length > 0)
+        playfield.removeChild(shadows.pop());
+      if (world.get(pos).isShadowing() && tileAnims[index] == null) {
+        var s;
+        if (!world.get(new IVector(x,y+1,z)).isShadowing()
+            && world.get(s=new IVector(x,y+1,z-1)).isShadowing())
+          shadow(shadows, "Shadow North", s, 1);
+
+        if (!world.get(new IVector(x,y-1,z)).isShadowing()
+            && world.get(s=new IVector(x,y-1,z-1)).isShadowing())
+          shadow(shadows, "Shadow South", s, 1);
+
+        if (!world.get(new IVector(x-1,y,z)).isShadowing()
+            && world.get(s=new IVector(x-1,y,z-1)).isShadowing())
+          shadow(shadows, "Shadow East", s, 1);
+
+        if (!world.get(new IVector(x+1,y,z)).isShadowing()
+            && world.get(s=new IVector(x+1,y,z-1)).isShadowing())
+          shadow(shadows, "Shadow West", s, 1);
+
+        if (!world.get(new IVector(x+1,y+1,z)).isShadowing()
+            && !world.get(new IVector(x+1,y,z)).isShadowing()
+            && !world.get(new IVector(x,y+1,z)).isShadowing()
+            && world.get(s=new IVector(x+1,y+1,z-1)).isShadowing())
+          shadow(shadows, "Shadow North West", s, 1);
+
+        if (!world.get(new IVector(x-1,y+1,z)).isShadowing()
+            && !world.get(new IVector(x-1,y,z)).isShadowing()
+            && !world.get(new IVector(x,y+1,z)).isShadowing()
+            && world.get(s=new IVector(x-1,y+1,z-1)).isShadowing())
+          shadow(shadows, "Shadow North East", s, 1);
+
+        if (!world.get(new IVector(x+1,y-1,z)).isShadowing()
+            && !world.get(new IVector(x+1,y,z)).isShadowing()
+            && !world.get(new IVector(x,y-1,z)).isShadowing()
+            && world.get(s=new IVector(x+1,y-1,z-1)).isShadowing())
+          shadow(shadows, "Shadow South West", s, 1);
+
+        if (!world.get(new IVector(x-1,y-1,z)).isShadowing()
+            && !world.get(new IVector(x-1,y,z)).isShadowing()
+            && !world.get(new IVector(x,y-1,z)).isShadowing()
+            && world.get(s=new IVector(x-1,y-1,z-1)).isShadowing())
+          shadow(shadows, "Shadow South East", s, 1);
+
+        if (world.get(new IVector(x-1,y+1,z)).isShadowing()
+            && world.get(s=pos).isShadowing()
+            && !world.get(new IVector(x,y+1,z)).isShadowing())
+          shadow(shadows, "Shadow Side West", s, 1);
+      }
     }
     
     function calcViewPos(pos) {
@@ -159,6 +231,18 @@ var GameView = (function () {
       };
     }
     
+    function setViewPos(tileElem, pos, fudge) {
+      var vp = calcViewPos(pos);
+      tileElem.style.zIndex = vp.zIndex + (fudge || 0);
+      tileElem.style.left = vp.x + "px";
+      tileElem.style.top = vp.y + "px";
+    }
+    
+    function setViewScale(tileElem) {
+      tileElem.style.width = drawWidth + "px";
+      tileElem.style.height = drawHeight + "px";
+    }
+    
     // Set layout styles
     function layout() {
       for (var z = 0; z < world.zw; z++) {
@@ -167,13 +251,9 @@ var GameView = (function () {
             var vec = new IVector(x, y, z);
             var tile = world.get(vec);
             var tileElem = tileElems[x*world.yw*world.zw + y*world.zw + z];
-            var vp = calcViewPos(vec);
-
-            tileElem.style.zIndex = vp.zIndex;
-            tileElem.style.left = vp.x + "px";
-            tileElem.style.top = vp.y + "px";
-            tileElem.style.width = drawWidth + "px";
-            tileElem.style.height = drawHeight + "px";
+            setViewPos(tileElem, vec);
+            setViewScale(tileElem);
+            updateShadows(vec); // incidentally updates shadow pos
           }
         }
       }      
@@ -195,6 +275,7 @@ var GameView = (function () {
             t = 0;
             clearInterval(interval);
             tileAnims[index] = null;
+            updateShadows(pos);
           }
           var animPos = pos.add(new IVector(offset.x * t, offset.y * t, offset.z * t)); // XXX abuse of IVector
           var vp = calcViewPos(animPos);
@@ -212,6 +293,7 @@ var GameView = (function () {
         }
         interval = setInterval(anim, 10);
         tileAnims[index] = interval;
+        updateShadows(pos); // clears shadows when it notices the anim
         anim();
       }
     };
@@ -252,7 +334,20 @@ var GameView = (function () {
       state.movePlayer(new IVector(x, y, 0));
     }
     
-    world.addChangeListener(update);
+    function changed(pos) {
+      var x = pos.x;
+      var y = pos.y;
+      var z = pos.z;
+      var np;
+      update(pos);
+      for (var nx = x - 1; nx <= x + 1; nx++)
+        for (var ny = y - 1; ny <= y + 1; ny++)
+          for (var nz = z - 1; nz <= z; nz++)
+            if (world.inBounds(np = new IVector(nx, ny, nz)))
+              updateShadows(np);
+    }
+    
+    world.addChangeListener(changed);
     state.addAnimationListener(animate);
     state.addPlayListener(playListener);
     playListener.status(state.getGameStatus());
