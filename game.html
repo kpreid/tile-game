@@ -16,6 +16,13 @@
       border: none;
       padding: 0;
     }
+    
+    /* Our DPI overrides cause the Android browser to go to generic buttons,
+       which results in black-on-black text. Fixing: */
+    button {
+      background: white;
+      color: black;
+    }
 
     .viewport {
       z-index: 0;
@@ -86,17 +93,26 @@
       vertical-align: middle;
     }
     
-    .dircontrols {
+    .dircontrols-overlay {
       right: .7em;
       bottom: .7em;
-      border-collapse: collapse;
       margin: auto;
     }
-    .dircontrols td {
+    #control-instructions {
+      text-align: right;
+      max-width: 13em;
+    }
+    #control-instructions button {
+      font-size: 1.6em;
+    }
+    .dircontrols-buttons {
+      border-collapse: collapse;
+    }
+    .dircontrols-buttons td {
       margin: 0;
       padding: 0;
     }
-    .dircontrols button {
+    .dircontrols-buttons button {
       font-size: 300%;
 
       margin: -0.2em;
@@ -146,13 +162,27 @@
   <div class="overlay instructions">
     <p id="state"></p>
   </div>
-  <table class="overlay dircontrols">
+  <div class="overlay dircontrols-overlay" id="dircontrols-overlay">
+    <div id="control-instructions">
+      Use the arrow keys to move — or would you like some touch buttons?<br>
+      <button onclick="
+        document.getElementById('control-buttons').style.display='table';
+        document.getElementById('control-instructions').style.display='none';
+      ">Yes
+      </button>
+      <button onclick="
+        document.getElementById('dircontrols-overlay').style.display='none';
+      ">No
+      </button>
+    </div>
+    <table id="control-buttons" class="dircontrols-buttons" style="display:none;">
       <tr><td><td><button onclick="gameView.playerMove(0, -1, 0)">&uarr;</button><td>
       <tr><td>    <button onclick="gameView.playerMove(-1, 0, 0)">&larr;</button>
           <td>
           <td>    <button onclick="gameView.playerMove(+1, 0, 0)">&rarr;</button>
       <tr><td><td><button onclick="gameView.playerMove(0, +1, 0)">&darr;</button><td>
-  </table>    
+    </table> 
+  </div>   
 </div>
 
 </body></html>
