@@ -1,0 +1,64 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en"><head>
+	<title>Kevin Reid: Tile Game</title>
+  <meta name="viewport" content="width=device-width" /> <!-- Tell mobiles not to do the fake-a-wide-screen thing -->
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="author" content="Kevin Reid"> 
+</head><body>
+
+  <h1>Tile Game</h1>
+  
+  <p style="text-align:center;"><img src="screenshot.png" style="max-width: 100%; border: none; background: black; padding: .3em; -webkit-border-radius: .6em; -moz-border-radius: .6em; border-radius: .6em">
+  
+  <h2>Origin and gameplay</h2>
+  
+  <p>“Tile Game” was a game I wrote in the spring of 2010 as my final project for CI272 Visual Basic at <a href="http://www.mvcc.edu/">MVCC</a>. It was written in, of course, Visual Basic. However, I thought the game design itself was interesting enough to warrant porting it to JavaScript so it would have a wider audience.</p>
+  
+  <p>The concept is that you move within a 3-dimensional block world, can pick up objects and push boxes, and can't jump or climb. Your goal is to reach the exit; your obstacle is flows of water shifted by your actions. The game is turn-based: you move once, and the world reacts. You cannot outrun the water.</p>
+  
+  <p>Despite a resemblance in the types of blocks present, I completed this game before I ever heard of Minecraft.</p>
+
+  <h2>The game</h2>
+
+  <p><a href="game.html">Play the game.</a></p>
+  
+  <p>I have tested it to work on all browsers conveniently to hand. In particular, it is functional, but tediously slow, on the Android 2.2 browser, probably due to the scaled tile images. Firefox is slow when scrolling. The best performance I found is on Safari and Chrome; I particularly recommend playing in Chrome's full-screen mode.</p>
+
+  <h2>The code</h2>
+
+  <p><a href="./">Browse the source code.</a></p>
+
+  <p>Get the source code: <a href="git://switchb.org/tile-game">git://switchb.org/tile-game</a></p>
+
+  <p>The tile images used in this project are <a href="http://lostgarden.com/2007/05/dancs-miraculously-flexible-game.html">the "PlanetCute" art by Daniel
+  Cook (Lostgarden.com)</a>
+  and are distributed under <a href="http://creativecommons.org/licenses/by/3.0/us/">the Creative Commons Attribution 3.0 License</a>. All other elements are Copyright 2010-2011 Kevin Reid, and may be distributed
+  and modified under the MIT License, the text of which follows.</p>
+  
+  <blockquote><p>Permission is hereby granted, free of charge, to any person
+  obtaining a copy of this software and associated documentation
+  files (the "Software"), to deal in the Software without
+  restriction, including without limitation the rights to use,
+  copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following
+  conditions:</p>
+
+  <p>The above copyright notice and this permission notice shall be
+  included in all copies or substantial portions of the Software.</p>
+
+  <p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+  OTHER DEALINGS IN THE SOFTWARE.</p></blockquote>
+  
+  <h2>Porting and technical notes</h2>
+  
+  <p>As of 2011-02-06, the port from the original VB code is now complete, other than some missing animation (specifically, there is no animation on win, and all but the last block of falling happens instantaneously). The approach for choosing the scale of the tiles could also use some improvement.</p>
+  
+</body></html>
